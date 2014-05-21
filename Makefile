@@ -6,7 +6,7 @@ SUBDIRS = base modules extensions
 
 all: deps $(SUBDIRS)
 
-$(SUBDIRS):
+$(SUBDIRS): deps
 	@echo ""
 	@echo ""
 	@echo "===== Building $@ ====="
