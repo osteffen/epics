@@ -1,7 +1,7 @@
 #
 #  This sets EPICS variables
 #
-EPICS_TOP=/home/f/epics
+EPICS_TOP=/opt/epics
 
 export EPICS_BASE=$EPICS_TOP/base
 export EPICS_HOST_ARCH=$($EPICS_TOP/base/startup/EpicsHostArch)
