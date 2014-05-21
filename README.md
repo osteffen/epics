@@ -5,14 +5,14 @@ My personal EPICS distribution for Debian-like systems (Debian, Ubuntu, Raspbian
 
 It contains:
 
-	* EPICS Base 3.15 (bazaar version May 21, 2014)
-	* Modules
-	  * seq
-	  * ipac
-	  * asyn
-	  * stream device
-	* Extensions
-	  * EasyCA
+ * EPICS Base 3.15 (bazaar version May 21, 2014)
+ * Modules
+  * seq
+  * ipac
+  * asyn
+  * stream device
+ * Extensions
+  * EasyCA
 
 All sources are taken from the EPICs website.
 The corresponding RELEASE files where adapted, no source files were changed.
