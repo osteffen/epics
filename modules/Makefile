@@ -1,4 +1,4 @@
-SUBDIRS = $(wildcard */)
+SUBDIRS := $(patsubst %/,%, $(wildcard */) )
 
 .PHONY: all $(SUBDIRS) clean
 
