@@ -8,5 +8,8 @@ sudo apt-get install ${DEPS}
 cd base
 make all install -j4
 
+cd ../modules
+make all install -j4
+
 cd ../extensions
 make all install -j4
