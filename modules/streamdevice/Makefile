@@ -14,4 +14,11 @@ iocBoot_DEPEND_DIRS += $(filter %App,$(DIRS))
 
 include $(TOP)/configure/RULES_TOP
 
+.PHONY: all clean
 
+all:
+	$(MAKE) -C src/
+
+clean:
+	rm -fr bin lib include dbd
+	$(MAKE) -C src/ clean
