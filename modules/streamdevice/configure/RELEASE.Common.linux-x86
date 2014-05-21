@@ -1,0 +1,3 @@
+# PCRE Settings for 32bit ubuntu/debian
+PCRE_INCLUDE=/usr/include
+PCRE_LIB=/usr/lib/i386-linux-gnu
