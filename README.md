@@ -26,7 +26,7 @@ Please see:
 
 Usage
 -----
-1. Clone into /opt/epics. Other destination paths are not supportet right now.
+1. Clone into /opt/epics. Other destination paths are not supported right now.
 2. cd /opt/epics
 3. make -jN, where N = number of processes to use. You will be asked to enter your password for sudo to install (possibly) missing dependencies.
 4. source thisEPICS.sh to set up paths.
