@@ -24,9 +24,10 @@ Please see:
   * The [EPICS website](http://www.aps.anl.gov/epics)
   * The [EPICs modules download page](http://www.aps.anl.gov/epics/download/modules/index.php)
 
-Usage
------
-1. Clone into /opt/epics. Other destination paths are not supported right now.
+Install
+-------
+1. Clone into /opt/epics. Other destination paths are not supportet right now (unless you find all hardcoded paths in the config files and adjust them).
 2. cd /opt/epics
-3. make -jN, where N = number of processes to use. You will be asked to enter your password for sudo to install (possibly) missing dependencies.
+3. make -jN, where N = number of processes to use. You will be asked to enter your password for sudo to install (possibly) missing dependencies. The build process takes about 75 minutes on the Raspberry Pi.
 4. source thisEPICS.sh to set up paths.
+5. Test: Type caget and see if it works.
