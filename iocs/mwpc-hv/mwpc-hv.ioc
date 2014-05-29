@@ -1,0 +1,29 @@
+dbLoadDatabase "/opt/epics/modules/caenN1470/dbd/caenN1470.dbd"
+dbLoadDatabase "/opt/epics/modules/streamdevice/dbd/stream.dbd"
+
+streamApp_registerRecordDeviceDriver
+
+epicsEnvSet "STREAM_PROTOCOL_PATH", "/opt/epics/modules/caenN1470/protocol"
+
+drvAsynSerialPortConfigure ("CAEN","/dev/ttyUSB0")
+asynSetOption ("CAEN", 0, "baud", "9600")
+asynSetOption ("CAEN", 0, "bits", "8")
+asynSetOption ("CAEN", 0, "parity", "none")
+asynSetOption ("CAEN", 0, "stop", "1")
+# asynSetOption ("CAEN", 0, "clocal", "Y")
+# asynSetOption ("CAEN", 0, "crtscts", "N")
+
+
+# PVs for the module
+dbLoadRecords "/opt/epics/modules/caenN1470/db/caenN1470.template","P=A,Q=B,PORT=CAEN,ADDR=0,name=Name,gda_name=gname,gda_desc=gdesc,label0=ch0,label1=ch1"
+
+# PVs for channel 1
+dbLoadRecords "/opt/epics/modules/caenN1470/db/caenN1470chan.template", "P=A,Q=B,PORT=CAEN,ADDR=0,CHAN=0,gda_name=ch1name"
+
+# PVs for channel 2
+dbLoadRecords "/opt/epics/modules/caenN1470/db/caenN1470chan.template", "P=A,Q=B,PORT=CAEN,ADDR=0,CHAN=1,gda_name=ch2name"
+
+iocInit
+
+# Debugging on?
+var streamDebug 1
