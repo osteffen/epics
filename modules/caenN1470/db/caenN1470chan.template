@@ -1,0 +1,187 @@
+# % macro, P, Device prefix
+# % macro, Q, Device suffix
+# % macro, PORT, Asyn port name
+# % macro, ADDR, Address of unit, normally 0
+# % macro, CHAN, Channel number in range 0..3
+# % macro, gda_name, Name to export to gda as
+# % autosave 2 SCAN
+record(seq, "$(P)$(Q):UPDATE$(CHAN)") {
+  field(DESC, "Update C$(CHAN) Params")
+  field(DOL1, "1")
+  field(LNK1, "$(P)$(Q):VSET$(CHAN):RBV.PROC")
+  field(DOL2, "1")
+  field(LNK2, "$(P)$(Q):VMON$(CHAN):RBV.PROC")
+  field(DOL3, "1")
+  field(LNK3, "$(P)$(Q):ISET$(CHAN):RBV.PROC")
+  field(DOL4, "1")
+  field(LNK4, "$(P)$(Q):IMON$(CHAN):RBV.PROC")
+  field(DOL5, "1")
+  field(LNK5, "$(P)$(Q):RUP$(CHAN):RBV.PROC")
+  field(DOL6, "1")
+  field(LNK6, "$(P)$(Q):RDW$(CHAN):RBV.PROC")
+  field(DOL7, "1")
+  field(LNK7, "$(P)$(Q):STAT$(CHAN):RBV.PROC")  
+}
+
+record(longout, "$(P)$(Q):HASC$(CHAN)") {
+  field(VAL, "1")
+  field(OUT, "$(P)$(Q):UPDATE$(CHAN).PROC PP")
+}
+
+#% gdatag,pv,rw,$(gda_name),VSET$(CHAN)
+# % autosave 2 VAL
+record(ao, "$(P)$(Q):VSET$(CHAN)") {
+  field(DESC, "HV Setpoint")
+  field(DTYP, "stream")
+  field(FLNK, "$(P)$(Q):VSET$(CHAN):RBV")
+  field(OUT, "@caenN1470.proto writechan($(ADDR),$(CHAN),VSET,$(P)$(Q)) $(PORT)")
+  field(PREC, "1")
+  field(EGU, "V")
+  field(DRVH, "8000")
+  field(DRVL, "0")
+  field(PINI, "YES")
+  field(SDIS, "$(P)$(Q):DISABLE")
+}
+
+# % gdatag,pv,ro,$(gda_name),VSET$(CHAN)RBV
+# % archiver 10 Monitor
+record(ai, "$(P)$(Q):VSET$(CHAN):RBV") {
+  field(DESC, "HV Setpoint Readback")
+  field(DTYP, "stream")
+  field(INP, "@caenN1470.proto readchan($(ADDR),$(CHAN),VSET,$(P)$(Q)) $(PORT)")
+  field(PREC, "1")
+  field(EGU, "V")
+  field(SDIS, "$(P)$(Q):DISABLE")
+}
+
+# % gdatag,pv,ro,$(gda_name),VMON$(CHAN)RBV
+# % archiver 10 Monitor
+record(ai, "$(P)$(Q):VMON$(CHAN):RBV") {
+  field(DESC, "HV Monitor")
+  field(DTYP, "stream")
+  field(INP, "@caenN1470.proto readchan($(ADDR),$(CHAN),VMON,$(P)$(Q)) $(PORT)")
+  field(PREC, "1")
+  field(EGU, "V")
+  field(SDIS, "$(P)$(Q):DISABLE")
+}
+
+#% gdatag,pv,rw,$(gda_name),ISET$(CHAN)
+# % autosave 2 VAL
+record(ao, "$(P)$(Q):ISET$(CHAN)") {
+  field(DESC, "HV Current Setpoint")
+  field(DTYP, "stream")
+  field(FLNK, "$(P)$(Q):ISET$(CHAN):RBV")
+  field(OUT, "@caenN1470.proto writechan($(ADDR),$(CHAN),ISET,$(P)$(Q)) $(PORT)")
+  field(PREC, "2")
+  field(EGU, "uA")
+  field(DRVH, "3000")
+  field(DRVL, "0")
+  field(PINI, "YES")
+  field(SDIS, "$(P)$(Q):DISABLE")
+}
+
+# % gdatag,pv,ro,$(gda_name),ISET$(CHAN)RBV
+# % archiver 10 Monitor
+record(ai, "$(P)$(Q):ISET$(CHAN):RBV") {
+  field(DESC, "HV Current Setpoint Readback")
+  field(DTYP, "stream")
+  field(INP, "@caenN1470.proto readchan($(ADDR),$(CHAN),ISET,$(P)$(Q)) $(PORT)")
+  field(PREC, "2")
+  field(EGU, "uA")
+  field(SDIS, "$(P)$(Q):DISABLE")
+}
+
+# % gdatag,pv,ro,$(gda_name),IMON$(CHAN)RBV
+# % archiver 10 Monitor
+record(ai, "$(P)$(Q):IMON$(CHAN):RBV") {
+  field(DESC, "HV Current Monitor")
+  field(DTYP, "stream")
+  field(INP, "@caenN1470.proto readchan($(ADDR),$(CHAN),IMON,$(P)$(Q)) $(PORT)")
+  field(PREC, "2")
+  field(EGU, "uA")
+  field(SDIS, "$(P)$(Q):DISABLE")
+}
+
+#% gdatag,pv,rw,$(gda_name),RUP$(CHAN)
+# % autosave 2 VAL
+record(ao, "$(P)$(Q):RUP$(CHAN)") {
+  field(DESC, "HV Ramp Up Rate")
+  field(DTYP, "stream")
+  field(FLNK, "$(P)$(Q):RUP$(CHAN):RBV")
+  field(OUT, "@caenN1470.proto writechan($(ADDR),$(CHAN),RUP,$(P)$(Q)) $(PORT)")
+  field(PREC, "0")
+  field(EGU, "V/s")
+  field(DRVH, "500")
+  field(DRVL, "1")
+  field(PINI, "YES")
+  field(SDIS, "$(P)$(Q):DISABLE")
+}
+
+# % gdatag,pv,ro,$(gda_name),RUP$(CHAN)RBV
+# % archiver 10 Monitor
+record(ai, "$(P)$(Q):RUP$(CHAN):RBV") {
+  field(DESC, "HV Ramp Up Rate Readback")
+  field(DTYP, "stream")
+  field(INP, "@caenN1470.proto readchan($(ADDR),$(CHAN),RUP,$(P)$(Q)) $(PORT)")
+  field(PREC, "0")
+  field(EGU, "V/s")
+  field(SDIS, "$(P)$(Q):DISABLE")
+}
+
+#% gdatag,pv,rw,$(gda_name),RDW$(CHAN)
+# % autosave 2 VAL
+record(ao, "$(P)$(Q):RDW$(CHAN)") {
+  field(DESC, "HV Ramp Down Rate")
+  field(DTYP, "stream")
+  field(FLNK, "$(P)$(Q):RDW$(CHAN):RBV")
+  field(OUT, "@caenN1470.proto writechan($(ADDR),$(CHAN),RDW,$(P)$(Q)) $(PORT)")
+  field(PREC, "0")
+  field(EGU, "V/s")
+  field(DRVH, "500")
+  field(DRVL, "1")
+  field(PINI, "YES")
+  field(SDIS, "$(P)$(Q):DISABLE")
+}
+
+# % gdatag,pv,ro,$(gda_name),RDW$(CHAN)RBV
+# % archiver 10 Monitor
+record(ai, "$(P)$(Q):RDW$(CHAN):RBV") {
+  field(DESC, "HV Ramp Down Rate Readback")
+  field(DTYP, "stream")
+  field(INP, "@caenN1470.proto readchan($(ADDR),$(CHAN),RDW,$(P)$(Q)) $(PORT)")
+  field(PREC, "0")
+  field(EGU, "V/s")
+  field(SDIS, "$(P)$(Q):DISABLE")
+}
+
+# % gdatag,mbbinary,ro,$(gda_name),STAT$(CHAN)RBV
+# % archiver 10 Monitor
+record(mbbiDirect, "$(P)$(Q):STAT$(CHAN):RBV") {
+  field(DESC, "Status")
+  field(DTYP, "stream")
+  field(INP, "@caenN1470.proto readchanint($(ADDR),$(CHAN),STAT,$(P)$(Q)) $(PORT)")
+  field(SDIS, "$(P)$(Q):DISABLE")
+}
+
+# % gdatag,binary,ro,$(gda_name),ON$(CHAN)RBV
+# % archiver 10 Monitor
+record(bi, "$(P)$(Q):ON$(CHAN):RBV") {
+  field(DESC, "Channel enabled readback")
+  field(INP, "$(P)$(Q):STAT$(CHAN):RBV.B0 CP")
+  field(ONAM, "ON")
+  field(ZNAM, "OFF")
+  field(SDIS, "$(P)$(Q):DISABLE")
+}
+
+# % gdatag,binary,rw,$(gda_name),ON$(CHAN)
+# % archiver 10 Monitor
+# % autosave 2 VAL
+record(bo, "$(P)$(Q):ON$(CHAN)") {
+  field(DESC, "Channel enabled")
+  field(DTYP, "stream")  
+  field(OUT, "@caenN1470.proto writechanon($(ADDR),$(CHAN),$(P)$(Q)) $(PORT)")
+  field(ONAM, "ON")
+  field(ZNAM, "OFF")
+  field(FLNK, "$(P)$(Q):STAT$(CHAN):RBV")  
+  field(SDIS, "$(P)$(Q):DISABLE")
+}

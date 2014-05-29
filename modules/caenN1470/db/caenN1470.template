@@ -1,0 +1,125 @@
+# % macro, P, Device prefix
+# % macro, Q, Device suffix
+# % macro, PORT, Asyn port name
+# % macro, ADDR, Address of unit, normally 0
+# % macro, DISABLED, Default disable mode for comms
+# % macro, name, Gui association name
+# % macro, gda_name, Name to export to gda as
+# % macro, gda_desc, Description for gda
+# % macro, label0, Label for channel 0
+# % macro, label1, Label for channel 1
+# % macro, label2, Label for channel 2
+# % macro, label3, Label for channel 3
+# % gdatag,template,caenN1470,$(gda_name),$(gda_desc)
+# % gui, $(name=), edm, caenN1470.edl, device=$(P)$(Q),label0=$(label0=Channel 0),label1=$(label1=Channel 1),label2=$(label2=Channel 2),label3=$(label3=Channel 3)
+# % autosave 2 SCAN
+record(seq, "$(P)$(Q):UPDATE") {
+  field(DESC, "Update Board Params")
+  field(DOL1, "1")
+  field(LNK1, "$(P)$(Q):BDNAME.PROC")
+  field(DOL2, "1")
+  field(LNK2, "$(P)$(Q):BDNCH.PROC")
+  field(DOL3, "1")
+  field(LNK3, "$(P)$(Q):BDFREL.PROC")
+  field(DOL4, "1")
+  field(LNK4, "$(P)$(Q):BDSNUM.PROC")
+  field(DOL5, "1")
+  field(LNK5, "$(P)$(Q):BDILK.PROC")
+  field(DOL6, "1")
+  field(LNK6, "$(P)$(Q):BDALARM.PROC")
+  field(SCAN, "10 second")
+  field(PINI, "YES")
+}
+
+# % autosave 2 SCAN
+record(seq, "$(P)$(Q):UPDATECHAN") {
+  field(DESC, "Update Channel Params")
+  field(DOL1, "1")
+  field(LNK1, "$(P)$(Q):HASC0.PROC")
+  field(DOL2, "1")
+  field(LNK2, "$(P)$(Q):HASC1.PROC")
+  field(DOL3, "1")
+  field(LNK3, "$(P)$(Q):HASC2.PROC")
+  field(DOL4, "1")
+  field(LNK4, "$(P)$(Q):HASC3.PROC")
+  field(SCAN, "1 second")
+  field(PINI, "YES")
+}
+
+# Screen hack to hide and show channels
+record(longout, "$(P)$(Q):HASC0") {
+  field(VAL, "0")
+  field(PINI, "YES")  
+}
+record(longout, "$(P)$(Q):HASC1") {
+  field(VAL, "0")
+  field(PINI, "YES")  
+}
+record(longout, "$(P)$(Q):HASC2") {
+  field(VAL, "0")
+  field(PINI, "YES")  
+}
+record(longout, "$(P)$(Q):HASC3") {
+  field(VAL, "0")
+  field(PINI, "YES")  
+}
+
+record(bo, "$(P)$(Q):DISABLE") {
+  field(DESC, "Disable comms")
+  field(PINI, "YES")
+  field(VAL, "$(DISABLED=1)")
+  field(OMSL, "supervisory")
+  field(ZNAM, "Enabled")
+  field(ONAM, "Disabled")
+}
+
+# % gdatag,pv,ro,$(gda_name),BDNAME
+# % gui,$(name=),sevr
+record(stringin, "$(P)$(Q):BDNAME") {
+  field(DESC, "BoardName")
+  field(DTYP, "stream")
+  field(INP, "@caenN1470.proto readstring($(ADDR),BDNAME,$(P)$(Q)) $(PORT)")
+  field(SDIS, "$(P)$(Q):DISABLE")
+}
+
+# % gdatag,pv,ro,$(gda_name),BDNCH
+record(stringin, "$(P)$(Q):BDNCH") {
+  field(DESC, "Board Number of Channels")
+  field(DTYP, "stream")
+  field(INP, "@caenN1470.proto readstring($(ADDR),BDNCH,$(P)$(Q)) $(PORT)")
+  field(SDIS, "$(P)$(Q):DISABLE")
+}
+
+# % gdatag,pv,ro,$(gda_name),BDFREL
+record(stringin, "$(P)$(Q):BDFREL") {
+  field(DESC, "Board Firmware release")
+  field(DTYP, "stream")
+  field(INP, "@caenN1470.proto readstring($(ADDR),BDFREL,$(P)$(Q)) $(PORT)")
+  field(SDIS, "$(P)$(Q):DISABLE")
+}
+
+# % gdatag,pv,ro,$(gda_name),BDSNUM
+record(stringin, "$(P)$(Q):BDSNUM") {
+  field(DESC, "Board Serial number")
+  field(DTYP, "stream")
+  field(INP, "@caenN1470.proto readstring($(ADDR),BDSNUM,$(P)$(Q)) $(PORT)")
+  field(SDIS, "$(P)$(Q):DISABLE")
+}
+
+# % gdatag,pv,ro,$(gda_name),BDILK
+# % archiver 10 Monitor
+record(stringin, "$(P)$(Q):BDILK") {
+  field(DESC, "Board Interlock")
+  field(DTYP, "stream")
+  field(INP, "@caenN1470.proto readstring($(ADDR),BDILK,$(P)$(Q)) $(PORT)")
+  field(SDIS, "$(P)$(Q):DISABLE")
+}
+
+# % gdatag,mbbinary,ro,$(gda_name),BDALARM
+# % archiver 10 Monitor
+record(mbbiDirect, "$(P)$(Q):BDALARM") {
+  field(DESC, "Board Alarm Status")
+  field(DTYP, "stream")
+  field(INP, "@caenN1470.proto readint($(ADDR),BDALARM,$(P)$(Q)) $(PORT)")
+  field(SDIS, "$(P)$(Q):DISABLE")
+}
