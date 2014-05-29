@@ -1,3 +1,3 @@
 #!/bin/bash -e
 
-exec /opt/epics/modules/streamdevice/bin/linux-x86_64/streamApp mwpc-hv.ioc
+exec /opt/epics/modules/streamdevice/bin/$EPICS_HOST_ARCH/streamApp mwpc-hv.ioc
