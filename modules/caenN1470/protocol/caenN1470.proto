@@ -1,0 +1,19 @@
+Terminator   = CR LF;
+
+## Read channel parameter
+readchan { out "$BD:\$1,CMD:MON,CH:\$2,PAR:\$3"; in "#BD:%*d,CMD:OK,VAL:%f"; }
+
+## Read parameter integer
+readint { out "$BD:\$1,CMD:MON,PAR:\$2"; in "#BD:%*d,CMD:OK,VAL:%u"; }
+
+## Read channel parameter integer
+readchanint { out "$BD:\$1,CMD:MON,CH:\$2,PAR:\$3"; in "#BD:%*d,CMD:OK,VAL:%u"; }
+
+## Read string
+readstring { out "$BD:\$1,CMD:MON,PAR:\$2"; in "#BD:%*d,CMD:OK,VAL:%s"; }
+
+## Write channel parameter
+writechan { out "$BD:\$1,CMD:SET,CH:\$2,PAR:\$3,VAL:%f"; in "#BD:%*d,CMD:OK"; @init{readchan; }; }
+
+## Write channel on/off
+writechanon { out "$BD:\$1,CMD:SET,CH:\$2,PAR:%s"; in "#BD:%*d,CMD:OK"; }
