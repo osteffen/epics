@@ -26,4 +26,4 @@ dbLoadRecords "/opt/epics/modules/caenN1470/db/caenN1470chan.template", "P=A,Q=B
 iocInit
 
 # Debugging on?
-var streamDebug 1
+#var streamDebug 1
