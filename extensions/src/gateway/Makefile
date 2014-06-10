@@ -142,7 +142,7 @@ gateway_SRCS += gateAsCa.cc
 gateway_SRCS += gateStat.cc
 
 # need access to casCtx.h
-USR_INCLUDES += -I$(EPICS_BASE)/src/cas/generic
+USR_INCLUDES += -I$(EPICS_BASE)/src/ca/legacy/pcas/generic
 
 PROD_HOST = gateway
 
