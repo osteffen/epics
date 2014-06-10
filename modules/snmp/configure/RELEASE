@@ -7,7 +7,7 @@
 # "gnumake clean uninstall install" in the top directory
 # each time EPICS_BASE, SNCSEQ, or any other external
 # module defined in the RELEASE file is rebuilt.
-EPICS_BASE=/home/epics/R3.14.12.2/base-3.14.12.2
+EPICS_BASE=/opt/epics/base
 
 TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
 
