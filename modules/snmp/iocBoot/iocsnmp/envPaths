@@ -1,5 +1,3 @@
-epicsEnvSet(ARCH,"linux-x86_64")
+epicsEnvSet(ARCH,$(EPICS_HOST_ARCH))
 epicsEnvSet(IOC,"iocsnmp")
 epicsEnvSet("TOP","/opt/epics/modules/snmp")
-epicsEnvSet("EPICS_BASE","/opt/epics/base")
-
