@@ -1,4 +1,4 @@
-DEPS = libreadline-dev re2c libpcre3-dev build-essential libsnmp-dev
+DEPS = libreadline-dev re2c libpcre3-dev build-essential libsnmp-dev snmp-mibs-downloader
 PACKAGEMANAGER = sudo apt-get
 SUBDIRS = base modules extensions
 
