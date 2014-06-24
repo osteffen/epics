@@ -1,0 +1,13 @@
+# screen session for the IOC and the Monitor scripts
+startup_message off
+deflogin on
+vbell off
+defnonblock 5
+
+hardstatus alwayslastline "%{KW} %{R}%H%{KW} < %-w%{Wk} %n %t %{-}%+w > %= %Y-%m-%d %c "
+
+# don't remove windows from the window list as soon as window process exits.
+zombie kr #  k: destory window, r: resurrect window
+
+screen -t "Gateway"  0 gateway/start.sh
+screen -t "Archiver" 1 /opt/archiver/ArchiveEngine.sh
