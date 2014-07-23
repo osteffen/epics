@@ -1,0 +1,574 @@
+#################################################################################################
+#												#
+#	EPICS .db file for reading and writing high voltage values for the Crystal Ball		#
+#												#
+#################################################################################################
+
+# In comments when refering to pvs only the last part in Camel Case is
+# used to prevent some typing - so for example when the 'InUse' pvs
+# are mentioned - the pvs with the full name
+# '$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):InUse' are meant.
+
+###############
+################### channel usage section
+###############
+
+# the 'WriteInUse' record writes to the 'InUse' record for every pv =
+# channel at IOC start, initializing the 'InUse' pvs with the values
+# as they are set in '.sub' file. 1 = channel is in use/ an element is
+# assigned to the channel, 0 = no element is assigend. Changing the
+# value of the 'InUse' pvs at runtime from 0 to 1 or backwards has an
+# effect on if the channels voltage variance is taken into account or
+# not at the 'VoltVariance' record (see 'reading voltages' section
+# below). By processing the 'WriteInUse' record the initial state can
+# be retrieved.
+
+record (ao, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):WriteInUse")
+{
+    field (VAL, "$(INUSE)")
+    field (OUT, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):InUse")
+    field (PINI, "YES")
+}
+
+record (ai, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):InUse")
+{
+}
+
+###############
+################### mapping section
+###############
+
+# The records are initialized with the values specified in the 'VAL'
+# field. When using 'caget' for example with the 'Element' pvs, the
+# Element for the according channel is displayed. As all available
+# channels of all boxes are in the database, every channel needs to
+# have entry for the 'ELEMENTNO' in the pattern in the '.sub'
+# file. Hence 1000 was chosen for channels that are not assigned to an
+# element number.
+
+record (ai, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):Element")
+{
+    field (VAL, "$(ELEMENTNO)")
+}
+
+record (ai, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):ADC")
+{
+    field (VAL, "$(ADCNO)")
+}
+
+record (ai, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):TDC")
+{
+    field (VAL, "$(TDCNO)")
+}
+
+record (stringin, "$(P):ELEMENT:$(ELEMENTNO):Channel")
+{
+    field (VAL, "$(BOXNO):$(LEVELNO):$(CHANNELNO)")
+}
+
+# The 'Channelnumber' record displays only the number of the channel
+# (integer from 0 to 7) within the level of the according box. This
+# record was supposed to be of use for the mapping display in CSS. It
+# turned out, that basically the 'Channel' record would be
+# enough. Though it may sometime could be of use and therefor stays in
+# the '.db' file. The same applies to the 'LevelNumber' and
+# 'BoxNumber' record.
+
+
+record (ai, "$(P):ELEMENT:$(ELEMENTNO):ChannelNumber")
+{
+    field (VAL, "$(CHANNELNO)")
+}
+
+record (ai, "$(P):ELEMENT:$(ELEMENTNO):LevelNumber")
+{
+    field (VAL, "$(LEVELNO)")
+}
+
+record (ai, "$(P):ELEMENT:$(ELEMENTNO):BoxNumber")
+{
+    field (VAL, "$(BOXNO)")
+}
+
+###############
+################### setting voltages section
+###############
+
+# The 'secret_set_volt' record - representing the old name schema -
+# can be used to set voltages without recalculating the variance or
+# alarm borders. Hence it can be used to deliberately trigger these
+# kinds of alarms.
+
+record (ao, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):secret_set_volt")
+{
+    field (DESC, "Used to set voltages by box")
+    field (EGU, "Volt")
+    field (LINR, "NO CONVERSION")
+    field (DTYP, "stream")
+    field (OUT, "@$(PROTO) set_voltage($(LEVELNO),$(CHANNELNO)) termBox$(BOXNO)")
+    field (PRIO, "HIGH")
+    field (PACT, "")    
+}
+
+# All records concerning setting high voltages and setting the eemem
+# have high priority - visible in the field 'PRIO'. This was done to
+# make sure, no reading (or in other words no other in- or ouput) is
+# disturbing setting values, as this happened some time when still
+# every voltage value was read seperately. Without the high priority
+# EPICS started mixing up the input from the box for different pvs
+# causing wrong values to be displayed in the pvs.
+
+# The idea behind the naming schema is, that all pvs having 'BOX' in
+# their names, requiere the numbers of the box, level and channel,
+# while pvs containing 'ELEMENT' are used with the element number. As
+# only the combination of the numbers of the box, level and channel
+# refer to real hardware, the attempt is to use a minimum amount of
+# pvs needing the element number and for further processing to forward
+# the input from records containg the element number to records using
+# the box, level, channel schema and internally only use records with
+# this schema.
+
+# The two 'SetVolt' records below are used to set the high
+# voltages. To make it possible, to set the high voltages using either
+# the element number or the box, level and channel number an ao record
+# for each name schema was created. Of course there are other
+# possibilities to achive this (like making the 'SetVolt' record using
+# the element number a calcout record writing to the 'box, level,
+# channel' 'SetVolt' records 'VAL' field or else, though this doesn't
+# seem to be better or worse.
+
+record (ao, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):SetVolt")
+{
+    field (DESC, "$(ELEMENTNO)")
+    field (EGU, "Volt")
+    field (LINR, "NO CONVERSION")
+    field (DTYP, "stream")
+    field (OUT,  "@$(PROTO) set_voltage($(LEVELNO),$(CHANNELNO)) termBox$(BOXNO)")
+    field (FLNK, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):LatestSetVoltChannel")
+    field (PRIO, "HIGH")
+    field (PACT, "")    
+}
+
+record (ao, "$(P):ELEMENT:$(ELEMENTNO):SetVolt")
+{
+    field (DESC, "$(BOXNO):$(LEVELNO):$(CHANNELNO)")
+    field (EGU, "Volt")
+    field (LINR, "NO CONVERSION")
+    field (DTYP, "stream")
+    field (OUT,  "@$(PROTO) set_voltage($(LEVELNO),$(CHANNELNO)) termBox$(BOXNO)")
+    field (FLNK, "$(P):ELEMENT:$(ELEMENTNO):LatestSetVoltElement")
+    field (PRIO, "HIGH")
+}
+
+# As the user can set the voltage either using the element or box,
+# level and channel number, the latest voltage value that this
+# channel(meant is the hardware channel) should have can now either be
+# in one of the two 'SetVolt' pvs that exist for each channel (one
+# using the element number, the other using the box, level, channel
+# number combination). As the 'OUT' field on both records is used to
+# write the value to the box, only the 'FLNK' field is left to cause
+# another record to process. Hence for each of the both records an
+# according 'calcout' record 'LatestSetVoltChannel' respectively
+# 'LatestSetVoltElement' was created. When the according 'SetVolt'
+# record is processed, the corresponding 'calcout' record is actively
+# forwarding the value to the 'LatestSetVolt' record. So no matter if
+# a channel's voltage is set via element or box, level, channel number
+# - the up to date value can be found in the 'LatestSetVolt' record.
+
+record (calcout, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):LatestSetVoltChannel")
+{
+    field (INPA, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):SetVolt")
+    field (CALC, "A")
+    field (OUT, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):LatestSetVolt.A")
+    field (FLNK, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):LatestSetVolt")
+    field (PRIO, "HIGH")
+}
+
+record (calcout, "$(P):ELEMENT:$(ELEMENTNO):LatestSetVoltElement")
+{
+    field (INPA, "$(P):ELEMENT:$(ELEMENTNO):SetVolt")
+    field (CALC, "A")
+    field (OUT, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):LatestSetVolt.A")
+    field (FLNK, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):LatestSetVolt")
+    field (PRIO, "HIGH")
+
+}
+
+record (calc, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):LatestSetVolt")
+{
+    field (INPA, "0")
+    field (CALC, "A")
+    field (FLNK, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):SetVoltPostprocessing")
+    field (PRIO, "HIGH")
+
+}
+
+# When a new voltage is set, a few things have to be done. The
+# 'SetVoltPostProcessing' record triggers all of the records that are
+# needed.
+
+
+record (fanout, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):SetVoltPostprocessing")
+{
+    field (LNK1, "$(P):BOX:$(BOXNO):SetActive")
+    field (LNK2, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):SetLow")
+    field (LNK3, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):SetHigh")
+    field (PRIO, "HIGH")
+}
+
+# The 'SetLow' and 'SetHigh' calcout records calculate the new alarm
+# borders for the corresponding 'ReadVolt' record (see 'reading
+# voltages section').
+
+record (calcout, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):SetLow")
+{
+    field (INPA, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):LatestSetVolt")
+    field (INPB, "2")
+    field (CALC, "A-B")
+    field (OUT, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):ReadVolt.LOW")
+    field (PRIO, "HIGH")
+}
+
+record (calcout, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):SetHigh")
+{
+    field (INPA, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):LatestSetVolt")
+    field (INPB, "2")
+    field (CALC, "A+B")
+    field (OUT, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):ReadVolt.HIGH")
+    field (PRIO, "HIGH")
+}
+
+# The 'IsActive' records are made to indicate when some voltages are
+# currently being changed. Whenever a new voltage value is set, the
+# value of the 'IsActive'pv of the corresponding box is set to 1,
+# which in turn sets the 'IsActive' pv for the entire Crystal Ball
+# ('CB:CB:HV:IsActive') to 1 using selection records. The selection
+# records 'Box1To12IsActive' and 'Box13To18IsActive' are saving the
+# highest value - which is automatically 1 as soon as one of the boxes
+# is setting voltages. The 'ReadVolt' record (see 'reading voltages
+# section') is triggering another record writing 0 to the 'IsActive'
+# record for the boxes. As reading is stopped while setting voltages
+# by the higher priority of records concerning setting voltages, the
+# 'IsActive' record is only 1 when voltages are set.
+
+record (calcout, "$(P):BOX:$(BOXNO):SetActive")
+{
+    field (INPA, "1")
+    field (CALC, "A")
+    field (OUT, "$(P):BOX:$(BOXNO):IsActive.A")
+    field (PRIO, "HIGH")
+}
+
+record (calcout, "$(P):BOX:$(BOXNO):IsActive")
+{
+    field (INPA, "0")
+    field (CALC, "A")
+    field (SCAN, ".1 second")
+    field (PRIO, "HIGH")
+    field (OUT, "$(P):IsActive.A")
+}
+
+record (sel, "$(P):Box1To12IsActive")
+{
+    field (INPA, "$(P):BOX:1:IsActive")
+    field (INPB, "$(P):BOX:2:IsActive")
+    field (INPC, "$(P):BOX:3:IsActive")
+    field (INPD, "$(P):BOX:4:sActive")
+    field (INPE, "$(P):BOX:5:IsActive")
+    field (INPF, "$(P):BOX:6:IsActive")
+    field (INPG, "$(P):BOX:7:IsActive")
+    field (INPH, "$(P):BOX:8:IsActive")
+    field (INPI, "$(P):BOX:9:IsActive")
+    field (INPJ, "$(P):BOX:10:IsActive")
+    field (INPK, "$(P):BOX:11:IsActive")
+    field (INPL, "$(P):BOX:12:IsActive")
+    field (SELM, "High Signal")
+    field (SCAN, ".1 second")
+    field (PRIO, "HIGH")
+}
+
+record (sel, "$(P):Box13To18IsActive")
+{
+    field (INPA, "$(P):BOX:13:IsActive")
+    field (INPB, "$(P):BOX:14:IsActive")
+    field (INPC, "$(P):BOX:15:IsActive")
+    field (INPD, "$(P):BOX:16:sActive")
+    field (INPE, "$(P):BOX:17:IsActive")
+    field (INPF, "$(P):BOX:18:IsActive")
+    field (SELM, "High Signal")
+    field (SCAN, ".1 second")
+    field (PRIO, "HIGH")
+}
+
+record (sel, "$(P):IsActive")
+{
+
+    field (INPA, "$(P):Box13To18IsActive")
+    field (INPA, "$(P):Box1To12IsActive")
+    field (SELM, "High Signal")
+    field (SCAN, ".1 second")
+
+}
+
+###############
+################### reading voltages section
+###############
+
+# When you read the comments above and took a look at the structure of
+# the records in the 'setting voltages section' - especially the
+# 'SetVoltPostProcessing' record you may wonder, why there is no such
+# 'fanout' type record used here. The truth is - this could have been
+# done, but the difference to the actual structure would have only
+# been, that there would be an additional record. Argumqenting like
+# this, the fanout record above could be removed as well - agreed, but
+# as runtime is not crucial here, these two different structures
+# should be seen as examples, of how things can be achieved in
+# different ways.
+
+# The 'ReadAdc' record causes the box to send a table containg all
+# voltage values. However this record itself does not retrieve any
+# data, it is just used to trigger the corresponding boxes to send the
+# values, the input is ignored.
+
+record (stringin, "$(P):BOX:$(BOXNO):ReadAdc")
+{
+    field (DTYP, "stream")
+    field (INP, "@$(PROTO) read_adc termBox$(BOXNO)")
+    field (SCAN, ".1 second")
+    field (PRIO, "LOW")
+}
+
+# The 'ReadVolt' record provides a pv for every channel. The 'SCAN'
+# field is set to 'I/O Intr' - this way the 'ReadVolt' pvs control
+# every input from the boxes and once the string matches the one
+# specified in the protocol file, the record is processed, gets and
+# saves the latest voltage value and then starts over. For more info,
+# see the streamdevice webpage!
+
+record (ai, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):ReadVolt")
+{
+    field (DESC, "$(ELEMENTNO)")
+    field (DTYP, "stream")
+    field (INP, "@$(PROTO) read_voltagel$(LEVELNO)ch$(CHANNELNO) termBox$(BOXNO)")
+    field (SCAN, "I/O Intr")
+    field (PACT, "")
+    field (STAT, "")
+    field (SEVR, "")
+    field (VAL, "")
+    field (HIHI, 1650)
+    field (HIGH, "")
+    field (LOW, "")
+    field (LOLO, 1250)
+    field (HHSV,"MAJOR")
+    field (HSV,"MINOR")
+    field (LSV,"MINOR")
+    field (LLSV,"MAJOR")
+    field (FLNK, "$(P):BOX:$(BOXNO):ReadActive")
+    field (PREC, 1)
+}
+
+# The following records where added to display voltage values also
+# using the element, ADC and TDC number. All these records do is
+# periodically scanning the only 'real' reading record and obtaining
+# the according voltage values.
+
+record (ai, "$(P):ELEMENT:$(ELEMENTNO):ReadVolt")
+{
+    field (INP, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):ReadVolt")
+    field (SCAN, ".1 second")
+    field (PACT, "")
+    field (STAT, "")
+    field (SEVR, "")
+    field (VAL, "")
+    field (HIHI, 1650)
+    field (HIGH, "")
+    field (LOW, "")
+    field (LOLO, 1250)
+    field (HHSV,"MAJOR")
+    field (HSV,"MINOR")
+    field (LSV,"MINOR")
+    field (LLSV,"MAJOR")
+    field (PREC, 1)
+}
+
+record (ai, "$(P):ADC:$(ADCNO):ReadVolt")
+{
+    field (INP, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):ReadVolt")
+    field (SCAN, ".1 second")
+    field (PACT, "")
+    field (STAT, "")
+    field (SEVR, "")
+    field (VAL, "")
+    field (HIHI, 1650)
+    field (HIGH, "")
+    field (LOW, "")
+    field (LOLO, 1250)
+    field (HHSV,"MAJOR")
+    field (HSV,"MINOR")
+    field (LSV,"MINOR")
+    field (LLSV,"MAJOR")
+    field (PREC, 1)
+}
+
+record (ai, "$(P):TDC:$(TDCNO):ReadVolt")
+{
+    field (INP, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):ReadVolt")
+    field (SCAN, ".1 second")
+    field (PACT, "")
+    field (STAT, "")
+    field (SEVR, "")
+    field (VAL, "")
+    field (HIHI, 1650)
+    field (HIGH, "")
+    field (LOW, "")
+    field (LOLO, 1250)
+    field (HHSV,"MAJOR")
+    field (HSV,"MINOR")
+    field (LSV,"MINOR")
+    field (LLSV,"MAJOR")
+    field (PREC, 1)
+}
+
+# After successfully reading a voltage value some things needs to be
+# done. As mentioned in the beginning of the section, this time the
+# sequence of different records is not coordinated via a fanout record
+# but by using forward link fields 'FLNK' to get from one record to
+# the next, just like a monkey uses a liana.
+
+# The 'ReadActive' record not only sets the 'IsActive' record from the
+# 'setting voltages section' to 0, it also triggers the calculation of
+# the voltage variance.
+
+record (calcout, "$(P):BOX:$(BOXNO):ReadActive")
+{
+    field (INPA, "0")
+    field (CALC, "A")
+    field (OUT, "$(P):BOX:$(BOXNO):IsActive.A")
+    field (FLNK, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):BoxVoltVariance")
+}
+
+# The start of the calculation of the voltage variance is to calculate
+# the actual difference between the voltage the corresponding channel
+# has and should have.
+
+record (calc, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):BoxVoltVariance")
+{
+    field (INPA, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):ReadVolt")
+    field (INPB, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):LatestSetVolt")
+    field (CALC, "A-B")
+    field (SCAN, ".1 second")
+    field (FLNK, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):VoltVariance")
+}
+
+# Once the real difference in voltage is calculated, the question is,
+# if this value should be considered or not. For example if a detector
+# is damaged and reads back a wrong voltage value, this variance
+# should be ignored. This can be done using a 'selection' type record
+# - and here is how i works: The value from the 'InUse' record from
+# the 'channel usage section' is used to judge if the real variance
+# should be used or ignored and set to 0. This works using the
+# 'Specified' in the 'SELM' field and the link to the 'InUse' record
+# in the 'NVL' field. Depending on the value in 'NVL' (that equals to
+# the value of the 'InUse' record) either the value of the
+# 'BoxVoltVariance' record or just the value 0 is used. When 'InUse'
+# is 0, INPA and hence the value 0 is chosen, in case 'InUse' 1 the
+# value from 'BoxVoltageVariance' is chosen.
+
+record (sel, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):VoltVariance")
+{
+    field (INPA, 0)
+    field (INPB, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):BoxVoltVariance")
+    field (SELM, "Specified")
+    field (NVL, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):InUse")
+    field (FLNK, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):AbsVoltVariance")
+
+}
+
+#The same mechanism that picks the value for the 'VoltVariance' pv for
+#each channel(read the last comment) is also used to choose the
+#highest voltage variance for one level and a box. Therefor one
+#selection record('.....$(LEVELNO):Status') monitors the variance
+#values of all channels of one level, choosing the higest one. As the
+#voltage value from the box can be higher or lower then the intended
+#one and the 'SELM' field of the selection records does only support
+#specific behaviour (take a look at the EPICS Wiki for more details)
+#before choosing the highest value, the absolute variance value is
+#calculated (otherwise for example if the second biggest variance
+#would be let's say 0,3 Volts and the biggest -2, for the selection
+#record 0,3 is bigger than -2 and therefor would be the 'biggest'
+#value).
+
+record (calc, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):AbsVoltVariance")
+{
+    field (INPA, "$(P):BOX:$(BOXNO):$(LEVELNO):$(CHANNELNO):VoltVariance")
+    field (CALC, "ABS(A)")
+}
+
+record (sel, "$(P):BOX:$(BOXNO):$(LEVELNO):Status")
+{
+    field (INPA, "$(P):BOX:$(BOXNO):$(LEVELNO):0:AbsVoltVariance")
+    field (INPB, "$(P):BOX:$(BOXNO):$(LEVELNO):1:AbsVoltVariance") 
+    field (INPC, "$(P):BOX:$(BOXNO):$(LEVELNO):2:AbsVoltVariance")
+    field (INPD, "$(P):BOX:$(BOXNO):$(LEVELNO):3:AbsVoltVariance") 
+    field (INPE, "$(P):BOX:$(BOXNO):$(LEVELNO):4:AbsVoltVariance")
+    field (INPF, "$(P):BOX:$(BOXNO):$(LEVELNO):5:AbsVoltVariance") 
+    field (INPG, "$(P):BOX:$(BOXNO):$(LEVELNO):6:AbsVoltVariance")
+    field (INPH, "$(P):BOX:$(BOXNO):$(LEVELNO):7:AbsVoltVariance") 
+    field (SELM, "High Signal")
+    field (SCAN, ".1 second")
+}
+
+record (sel, "$(P):BOX:$(BOXNO):Status")
+{
+    field (INPA, "$(P):BOX:$(BOXNO):0:Status")
+    field (INPB, "$(P):BOX:$(BOXNO):1:Status") 
+    field (INPC, "$(P):BOX:$(BOXNO):2:Status")
+    field (INPD, "$(P):BOX:$(BOXNO):3:Status") 
+    field (INPE, "$(P):BOX:$(BOXNO):4:Status")
+    field (SELM, "High Signal")
+    field (SCAN, ".1 second")
+}
+
+###############
+################### Temperature section
+###############
+
+# The way the temperature reading is integrated, is not the most
+# elegant one. The best way would be to create new pattern in the
+# '.sub' file and a new'.db' for them. But as there are only 3 of them
+# and that is needed currently is reading these values, the extra file
+# needed, does not seem to be worth it.
+
+# Reading the temperature works the same, as reading voltages. The
+# 'ReadTemp' record causes the box to send the values. The
+# '...TEMP:<SENSORNUMBER>' records wait for a suitable string, and
+# retrieve the value.
+
+record (stringin, "$(P):TEMP:ReadTemp")
+{
+    field (DTYP, "stream")
+    field (INP,"@$(PROTO) read_temp termBox1")
+    field (SCAN, ".1 second")
+    field (PRIO, "HIGH")
+}
+
+record (ai, "$(P):Temp_0")
+{
+    field (DTYP, "stream")
+    field (INP,"@$(PROTO) read_temp0 termBox1")
+    field (SCAN, "I/O Intr")
+}
+
+record (ai, "$(P):Temp_1")
+{
+    field (DTYP, "stream")
+    field (INP, "@$(PROTO) read_temp1 termBox1")
+    field (SCAN, "I/O Intr")
+}
+
+record (ai, "$(P):Temp_2")
+{
+    field (DTYP, "stream")
+    field (INP,"@$(PROTO) read_temp2 termBox1")
+    field (SCAN, "I/O Intr")
+}

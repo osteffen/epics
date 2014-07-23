@@ -1,0 +1,494 @@
+# This file contains the protocols for the Crystal Ball High Voltage
+# Control used in the files 'cbhv_voltage.db', 'cbhv_eemem_nm.db',
+# 'cbhv_eemem_read.db' and 'cbhv_eemem_set.db'.
+
+# The definitions below are necessary to parse the voltage values for
+# individual channels. Parsing by ignoring a certain number of
+# chararcters and then looking for a number to get a specfic voltage
+# values does not work properly. For example when a channel's fuse is
+# broken, its value is 0,... - obviously this number has less
+# characters then the 4 digits value before the ',' that is used as a
+# standard. So when parsing a certain amount of numbers needs to be
+# skipped before the correct number appears. THe attempt was made to
+# put these definitions into the .sub file, but epics caused errors as
+# th strings got too long. Therefor they were placed directly in this
+# file. There may be a better way to do this, but for now it does the
+# trick and as it was important to get things going rather than other
+# things, this solution was used so far.
+
+l0ch1 = "%*d,%*f,%f";
+l0ch2 = "%*d,%*f,%*f,%f";
+l0ch3 = "%*d,%*f,%*f,%*f,%f";
+l0ch4 = "%*d,%*f,%*f,%*f,%*f,%f";
+l0ch5 = "%*d,%*f,%*f,%*f,%*f,%*f,%f";
+l0ch6 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%f";
+l0ch7 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%f";
+l1ch0 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%f";
+l1ch1 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%f";
+l1ch2 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%f";
+l1ch3 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%f";
+l1ch4 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%f";
+l1ch5 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%f";
+l1ch6 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%f";
+l1ch7 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%f";
+l2ch0 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%f";
+l2ch1 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%f";
+l2ch2 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%f";
+l2ch3 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%f";
+l2ch4 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%f";
+l2ch5 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%f";
+l2ch6 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%f";
+l2ch7 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%f";
+l3ch0 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%f";
+l3ch1 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%f";
+l3ch2 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%f";
+l3ch3 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%f";
+l3ch4 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%f";
+l3ch5 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%f";
+l3ch6 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%f";
+l3ch7 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%f";
+l4ch0 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%f";
+l4ch1 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%f";
+l4ch2 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%f";
+l4ch3 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%f";
+l4ch4 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%f";
+l4ch5 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%f";
+l4ch6 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%f";
+l4ch7 = "%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%*f%*d,%*f,%*f,%*f,%*f,%*f,%*f,%*f,%f";
+
+# Below are some general definitions - take a look at the streamDevice
+# homepage for more
+# info. https://www.slac.stanford.edu/grp/cd/soft/epics/site/streamdevice/protocol.html
+
+OutTerminator = CR LF;
+InTerminator = ">";
+pollperiod = 1;
+#ReplyTimeout = 6000;
+LockTimeout = 300000;
+#WriteTimeout = 200000;
+extraInput = ignore;
+
+# There were some issues with getting the definitions from above into
+# the string that should be sent to the devices. The easiest though
+# not most effecient/ best methode was, to create a read command for
+# every channel. There are ways to reduce the amount of code but for
+# now this works. The protocols below are used by the 'ReadVolt' pvs
+# from 'cbhv_voltage.db'.
+
+read_voltagel0ch0
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c%*d,%f%*#s";
+}
+
+read_voltagel0ch1
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l0ch1;
+}
+
+read_voltagel0ch2
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l0ch2;
+}
+
+read_voltagel0ch3
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l0ch3;
+}
+
+read_voltagel0ch4
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l0ch4;
+}
+
+read_voltagel0ch5
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l0ch5;
+}
+
+read_voltagel0ch6
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l0ch6;
+}
+
+read_voltagel0ch7
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l0ch7;
+}
+
+read_voltagel1ch0
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l1ch0;
+}
+
+read_voltagel1ch1
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l1ch1;
+}
+
+read_voltagel1ch2
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l1ch2;
+}
+
+read_voltagel1ch3
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l1ch3
+}
+
+read_voltagel1ch4
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l1ch4;
+}
+
+read_voltagel1ch5
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l1ch5;
+}
+
+read_voltagel1ch6
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l1ch6;
+}
+
+read_voltagel1ch7
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l1ch7;
+}
+
+read_voltagel2ch0
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l2ch0;
+}
+
+read_voltagel2ch1
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l2ch1
+}
+
+read_voltagel2ch2
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l2ch2;
+}
+
+read_voltagel2ch3
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l2ch3;
+}
+
+read_voltagel2ch4
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l2ch4;
+}
+
+read_voltagel2ch5
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l2ch5;
+}
+
+read_voltagel2ch6
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l2ch6;
+}
+
+read_voltagel2ch7
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l2ch7;
+}
+
+read_voltagel3ch0
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l3ch0;
+}
+
+read_voltagel3ch1
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l3ch1;
+}
+
+read_voltagel3ch2
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l3ch2;
+}
+
+read_voltagel3ch3
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l3ch3;
+}
+
+read_voltagel3ch4
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l3ch4;
+}
+
+read_voltagel3ch5
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l3ch5;
+}
+
+read_voltagel3ch6
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l3ch6;
+}
+
+read_voltagel3ch7
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l3ch7;
+}
+
+read_voltagel4ch0
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l4ch0;
+}
+
+read_voltagel4ch1
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l4ch1;
+}
+
+read_voltagel4ch2
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l4ch2;
+}
+
+read_voltagel4ch3
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l4ch3;
+}
+
+read_voltagel4ch4
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l4ch4;
+}
+
+read_voltagel4ch5
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l4ch5;
+}
+
+read_voltagel4ch6
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l4ch6;
+}
+
+read_voltagel4ch7
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c"$l4ch7;
+}
+
+# This protocol causes the boxes to send the table including all
+# voltage values. Though the input is not used, it is best to define
+# an in command as otherwise there comes some input from the box,
+# epics does not know what to do with.
+
+read_adc
+{
+out "read_adc csv";
+in "%*#s";
+ReplyTimeout = 5000;
+ReadTimeout = 5000;
+}
+
+# Setting the voltages is done using this protocol.
+
+set_voltage 
+{
+out "SetVpmF \$1 \$2 %f";
+in "%*#s";
+ReplyTimeout = 50000;
+ReadTimeout = 50000;
+}
+
+# Using this protocol the temperatures of the three sensors in box 1
+# are gathered.
+
+read_temp
+{
+out "READTEMP";
+in "%*#s";
+ReplyTimeout = 50000;
+ReadTimeout = 50000;
+}
+
+# These protocols - like the readvoltage ones - are the ones used by
+# passive pvs searching for matching strings, so the temperature
+# values end up in the correct pvs.
+
+read_temp0
+{
+in "           | Temperatur %*113c%7f%*#s";
+}
+
+read_temp1
+{
+in "           | Temperatur %*141c%7f%*#s";
+}
+
+read_temp2
+{
+in "           | Temperatur %*168c%7f%*#s";
+}
+
+####################### read and write eemem values ########################
+
+# The following protocols are used to read and set the eemem.
+
+
+
+eemem_print
+{
+wait = 1000;
+out "eemem print";
+in "Config%#s";
+InTerminator = ">";
+ReplyTimeout = 25000;
+ReadTimeout = 25000;
+extraInput=ignore;
+@mismatch
+{
+out "eemem print";
+in "Config%#s";
+}
+}
+
+read_eemem_value 
+{
+in "\$1=%s";
+InTerminator = CR LF;
+extraInput = ignore;
+}
+
+# Taking the following protocol as an example, please note that though
+# it is basically an empty line - there is something the box is
+# sending back after each command. This has to be taken into account
+# as otherwise epics would not wait with sending the commands until
+# the prior one is finished. This would lead to unwanted behaviour as
+# the box then is gets several commands it cannot handle that fast.
+
+set_eemem_value_standalone 
+{
+extraInput = ignore;
+out "eemem unprotect";
+in "unprotectet";
+out "eemem del \$1";
+in "";
+out "eemem add \$1 %s";
+in "";
+out "eemem protect";
+in "";
+out "eemem print";
+in "%*s";
+out "read_config";
+in "Konfiguration aus EEPROM %*s";
+ReplyTimeout = 25000;
+ReadTimeout = 25000;
+}
+
+set_eemem_value 
+{
+extraInput = ignore;
+out "eemem del \$1";
+in "";
+out "eemem add \$1 %s";
+in "";
+ReplyTimeout = 25000;
+ReadTimeout = 25000;
+}
+
+unprotect_eemem {
+extraInput = ignore;
+out "eemem unprotect";
+in "unprotectet";
+ReplyTimeout = 25000;
+ReadTimeout = 25000;
+}
+
+protect_eemem 
+{
+extraInput = ignore;
+out "eemem protect";
+in "";
+ReplyTimeout = 25000;
+ReadTimeout = 25000;
+}
+
+reload_eemem 
+{
+extraInput = ignore;
+out "read_config";
+in "Konfiguration aus EEPROM %*s";
+ReplyTimeout = 25000;
+ReadTimeout = 25000;
+}
+
+####################### eemem M and N values ###############
+
+read_mnx0
+{
+in "\$1\$2=%f";
+InTerminator = CR LF;
+extraInput = ignore;
+}
+
+read_mnx1
+{
+in "\$1\$2=%*f,%f";
+InTerminator = CR LF;
+extraInput = ignore;
+}
+
+read_mnx2
+{
+in "\$1\$2=%*f,%*f,%f";
+InTerminator = CR LF;
+extraInput = ignore;
+}
+
+read_mnx3
+{
+in "\$1\$2=%*f,%*f,%*f,%f";
+InTerminator = CR LF;
+extraInput = ignore;
+}
+
+read_mnx4
+{
+in "\$1\$2=%*f,%*f,%*f,%*f,%f";
+InTerminator = CR LF;
+extraInput = ignore;
+}
+
+read_mnx5
+{
+in "\$1\$2=%*f,%*f,%*f,%*f,%*f,%f";
+InTerminator = CR LF;
+extraInput = ignore;
+}
+
+read_mnx6
+{
+in "\$1\$2=%*f,%*f,%*f,%*f,%*f,%*f,%f";
+InTerminator = CR LF;
+extraInput = ignore;
+}
+
+read_mnx7
+{
+in "\$1\$2=%*f,%*f,%*f,%*f,%*f,%*f,%*f,%f";
+InTerminator = CR LF;
+extraInput = ignore;
+}
+
+# This protocol sets the M and N values. It takes the value stored in
+# the INP fields of the calling calcout record, concatinates them to
+# the needed string and writes them to the device.
+
+set_nmx
+{
+extraInput = ignore;
+out "eemem del \$1\$2";
+in "";
+out "eemem add \$1\$2 %(A)f,%(B)f,%(C)f,%(D)f,%(E)f,%(F)f,%(G)f,%(H)f";
+in "";
+ReplyTimeout = 25000;
+ReadTimeout = 25000;
+}

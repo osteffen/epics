@@ -1,0 +1,17 @@
+# This record obtains the values for every eemem value except the
+# M<numbe> and N<number> values. It could have been realised together
+# with '....Set<Eememvalue>' record, but as then both would use the
+# same pattern in the .sub file, it would be possible to write to
+# eemem values that should be read only. As per .db file only one
+# pattern is possible, the best way to make sure read only values are
+# really read only is to create a separate pattern for read eemem pvs,
+# so for setting eemem values the read only values (like R1 and R2 do
+# not exist) - just compare the patterns for the cbhvtest_eemem_read.db
+# and cbhvtest_eemem_set.db file in the cbhvtest.sub file.
+
+record (stringin, "$(P):BOX:$(BOXNO):Read$(EELO)")
+{
+    field (DTYP, "stream")
+    field (INP, "@$(PROTO) read_eemem_value($(EEUP)) termBox$(BOXNO)")
+    field (SCAN, "I/O Intr")
+}

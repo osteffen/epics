@@ -11,3 +11,4 @@ zombie kr #  k: destory window, r: resurrect window
 
 screen -t "Gateway"  0 gateway/start.sh
 screen -t "Archiver" 1 /opt/archiver/ArchiveEngine.sh
+screen -t "CBHV"	2	cb-hv/cb-hv.ioc

@@ -1,0 +1,66 @@
+# The records in this .db  file are responsible for setting eemem values
+
+# The record below was designed to change one eemem value using the
+# command line/ epics directly. As there are some steps necessary to
+# do this (unprotecting the eemem, deleting the old value, setting the
+# new one, reloading the eemem for the changes to take effect,
+# reprinting the eemem so the new value also gets distributed to the
+# according epics pvs and finally protecting the eemem again) the idea
+# was to have one record which does all this for one value. In case
+# more values need to be changed, there also exist pvs doing all these
+# task seperately, so one can for example unprotect the eemem, change
+# all desired values and then reload, reprint and protect the eemem
+# again.
+record (stringout, "$(P):BOX:$(BOXNO):Set$(EELO)Standalone")
+{
+    field (DTYP, "stream")
+    field (OUT, "@$(PROTO) set_eemem_value_standalone($(EEUP)) termBox$(BOXNO)")
+    field (PRIO, "HIGH")
+}
+
+# As described in the text above, the following pvs can be used to
+# change multiple values eemem values, when used in the correct
+# order. First the eemem needs to be unprotected, then the new values
+# have to be set and after that in arbitrary order the eemem has to be
+# reloaded, reprinted and protected again. The following pvs can do
+# all of this. Just take a look at the corresponding 'cbhv.proto' and
+# 'cbhv.sub' file to see the commands the different pvs use to get the
+# job done. For further infos on the different commands also take a
+# look at the hv distribution box manual created by Dipl. Ing Oliver
+# Corell.
+
+record (stringout, "$(P):BOX:$(BOXNO):UnprotectEemem")
+{
+    field (DTYP, "stream")
+    field (OUT, "@$(PROTO) unprotect_eemem termBox$(BOXNO)")
+    field (PRIO, "HIGH")
+}
+
+record (stringout, "$(P):BOX:$(BOXNO):Set$(EELO)")
+{
+    field (DTYP, "stream")
+    field (OUT, "@$(PROTO) set_eemem_value($(EEUP)) termBox$(BOXNO)")
+    field (PRIO, "HIGH")
+}
+
+record (stringout, "$(P):BOX:$(BOXNO):ProtectEemem")
+{
+    field (DTYP, "stream")
+    field (OUT, "@$(PROTO) protect_eemem termBox$(BOXNO)")
+    field (PRIO, "HIGH")
+}
+
+record (stringout, "$(P):BOX:$(BOXNO):ReloadEemem")
+{
+    field (DTYP, "stream")
+    field (OUT, "@$(PROTO) reload_eemem termBox$(BOXNO)")
+    field (PRIO, "HIGH")
+}
+
+record (stringout, "$(P):BOX:$(BOXNO):PrintEemem")
+{
+    field (DTYP, "stream")
+    field (OUT, "@$(PROTO) eemem_print termBox$(BOXNO)")
+    field (PRIO, "HIGH")
+    field (PINI, "YES")
+}
