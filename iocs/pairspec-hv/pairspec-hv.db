@@ -1,0 +1,27 @@
+record (ai, "$(P):$(CHANNELNO):ReadVolt")
+{
+    field (DTYP, "stream")
+    field (INP, "@$(PROTO) read_hvp$(CHANNELNO) hvp")
+    field (SCAN, "I/O Intr")
+}
+
+record (stringin, "$(P):ReadAdc")
+{
+    field (DTYP, "stream")
+    field (INP, "@$(PROTO) read_adc hvp")
+    field (SCAN, "5 second")
+}
+
+record (ao, "$(P):$(CHANNELNO):SetVolt")
+{
+    field (OUT, "@$(PROTO) set_hvp($(CHANNELNO)) hvp")
+    field (DTYP, "stream")
+    field (DRVL, 60)
+    field (DRVH, 75)    
+}
+
+record (ai, "$(P):test")
+
+{
+#    field (INP, "test")
+}

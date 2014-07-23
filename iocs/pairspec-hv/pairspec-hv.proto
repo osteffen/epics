@@ -1,0 +1,41 @@
+OutTerminator = CR LF;
+InTerminator = ">";
+ReplyTimeout = 5000;
+ReadTimeout = 5000;
+extraInput = ignore;
+
+read_adc
+{
+out "read_adc csv";
+in "%*#s";
+@mismatch {}
+extraInput = ignore;
+}
+
+read_hvp1
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c%*d,%*f,%f";
+}
+
+read_hvp2
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c%*d,%*f,%*f,%f";
+}
+
+read_hvp3
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c%*d,%*f,%*f,%*f,%f";
+}
+
+read_hvp4
+{
+in "%*d.%*d.%*d %*d:%*d:%*d%*2cZeit,Ebene,%*65c%*d,%*f,%*f,%*f,%*f,%f";
+}
+
+set_hvp
+{
+out "SetVpmF 0 \$1 %f";
+in "%*#s";
+ReplyTimeout = 50000;
+ReadTimeout = 50000;
+}

@@ -1,0 +1,9 @@
+file "pairspec-hv.db"
+{
+	pattern {PROTO, P, CHANNELNO}
+	
+		{pairspec-hv.proto, BEAM:PAIRSPEC:HV, 1}
+		{pairspec-hv.proto, BEAM:PAIRSPEC:HV, 2}
+		{pairspec-hv.proto, BEAM:PAIRSPEC:HV, 3}
+		{pairspec-hv.proto, BEAM:PAIRSPEC:HV, 4}
+}

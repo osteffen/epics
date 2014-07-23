@@ -1,0 +1,13 @@
+dbLoadDatabase "/opt/epics/modules/streamdevice/dbd/streamApp.dbd"
+streamApp_registerRecordDeviceDriver
+
+#streamApp
+
+epicsEnvSet "STREAM_PROTOCOL_PATH", "."
+
+drvAsynIPPortConfigure ("hvp", "hv-pairspec:23")
+
+dbLoadTemplate "pairspec-hv.sub"
+iocInit
+
+#var streamDebug 1
